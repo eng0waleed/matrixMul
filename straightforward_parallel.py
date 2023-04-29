@@ -1,14 +1,20 @@
 
 from multiprocessing import Pool
-def multiply_matrix_parallel(A, B):
+from time import time
+
+def StraightDivAndConqP(A, B):
     n = len(A)
-    C = [ [0 for i in range(n)] for j in range(n)]
-    pool = Pool()
-    C = pool.map(multiply_matrix_parallel_helper, [(A, B, i, n) for i in range(n)])
+    C = [[0]*n]*n
+    start = time()
+    pool = Pool(processes=n)
+    C = pool.map(multiply_straightforward, [(A, B, i, n) for i in range(n)])
+    end = time()
+    print('Time taken: ', end - start)
     return C
 
-def multiply_matrix_parallel_helper(args):
+def multiply_straightforward(args):
     A, B, i, n = args
+    print(i)
     return [sum([A[i][k] * B[k][j] for k in range(n)]) for j in range(n)]
 
 def read_matrix(filename):
@@ -34,7 +40,7 @@ def setMatrixDimentions(n):
 #write a main function to run the functions
 if __name__ == '__main__':
     A_matrix, B_matrix = read_matrix('myfile.txt')
-    C_matrix = multiply_matrix_parallel(A_matrix, B_matrix)
+    C_matrix = StraightDivAndConqP(A_matrix, B_matrix)
     with open('result.txt', 'w') as f:
         f.write(str(n_value) + '\n')
         for i in range(n_value):
