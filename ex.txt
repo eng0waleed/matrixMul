@@ -4,9 +4,22 @@ def straightforward_divide_and_conquer_matrix_multiplication(A, B, C, n):
         return
 
     m = n // 2
-    A11, A12, A21, A22 = A[:m, :m], A[:m, m:], A[m:, :m], A[m:, m:]
-    B11, B12, B21, B22 = B[:m, :m], B[:m, m:], B[m:, :m], B[m:, m:]
-    C11, C12, C21, C22 = C[:m, :m], C[:m, m:], C[m:, :m], C[m:, m:]
+    A11, A12, A21, A22 = [], [], [], []
+    B11, B12, B21, B22 = [], [], [], []
+    C11, C12, C21, C22 = [], [], [], []
+    for i in range(m):
+        A11.append(A[i][:m])
+        A12.append(A[i][m:])
+        A21.append(A[i+m][:m])
+        A22.append(A[i+m][m:])
+        B11.append(B[i][:m])
+        B12.append(B[i][m:])
+        B21.append(B[i+m][:m])
+        B22.append(B[i+m][m:])
+        C11.append([0] * m)
+        C12.append([0] * m)
+        C21.append([0] * m)
+        C22.append([0] * m)
 
     straightforward_divide_and_conquer_matrix_multiplication(A11, B11, C11, m)
     straightforward_divide_and_conquer_matrix_multiplication(A12, B21, C11, m)
@@ -17,7 +30,8 @@ def straightforward_divide_and_conquer_matrix_multiplication(A, B, C, n):
     straightforward_divide_and_conquer_matrix_multiplication(A21, B12, C22, m)
     straightforward_divide_and_conquer_matrix_multiplication(A22, B22, C22, m)
 
-    C[:m, :m] = C11
-    C[:m, m:] = C12
-    C[m:, :m] = C21
-    C[m:, m:] = C22
+    for i in range(m):
+        C[i][:m] = C11[i]
+        C[i][m:] = C12[i]
+        C[i+m][:m] = C21[i]
+        C[i+m][m:] = C22[i]
