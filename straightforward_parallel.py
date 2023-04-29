@@ -1,5 +1,6 @@
 
 from multiprocessing import Pool
+
 def multiply_matrix_parallel(A, B):
     n = len(A)
     C = [ [0 for i in range(n)] for j in range(n)]
