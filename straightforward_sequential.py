@@ -97,50 +97,45 @@ def multiply_straightforward(args):
 #     return C
 
 
-# def straightforward_divide_and_conquer_matrix_multiplication(A, B, C, n):
-#     if n == 1:
-#         C[0][0] = A[0][0] * B[0][0]
-#         return
+def straightforward_divide_and_conquer_matrix_multiplication(A, B, C, n):
+    if n == 1:
+        C[0][0] = A[0][0] * B[0][0]
+        return
 
-#     m = n // 2
-#     A11, A12, A21, A22 = A[:m, :m], A[:m, m:], A[m:, :m], A[m:, m:]
-#     B11, B12, B21, B22 = B[:m, :m], B[:m, m:], B[m:, :m], B[m:, m:]
-#     C11, C12, C21, C22 = C[:m, :m], C[:m, m:], C[m:, :m], C[m:, m:]
+    m = n // 2
+    A11, A12, A21, A22 = [], [], [], []
+    B11, B12, B21, B22 = [], [], [], []
+    C11, C12, C21, C22 = [], [], [], []
+    for i in range(m):
+        A11.append(A[i][:m])
+        A12.append(A[i][m:])
+        A21.append(A[i+m][:m])
+        A22.append(A[i+m][m:])
+        B11.append(B[i][:m])
+        B12.append(B[i][m:])
+        B21.append(B[i+m][:m])
+        B22.append(B[i+m][m:])
+        C11.append([0] * m)
+        C12.append([0] * m)
+        C21.append([0] * m)
+        C22.append([0] * m)
+    print (C11, C12, C21, C22)
 
-#     straightforward_divide_and_conquer_matrix_multiplication(A11, B11, C11, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A12, B21, C11, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A11, B12, C12, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A12, B22, C12, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A21, B11, C21, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A22, B21, C21, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A21, B12, C22, m)
-#     straightforward_divide_and_conquer_matrix_multiplication(A22, B22, C22, m)
+    C11 = straightforward_divide_and_conquer_matrix_multiplication(A11, B11, C11, m)
+    C11 = straightforward_divide_and_conquer_matrix_multiplication(A12, B21, C11, m)
+    C12 = straightforward_divide_and_conquer_matrix_multiplication(A11, B12, C12, m)
+    C12 = straightforward_divide_and_conquer_matrix_multiplication(A12, B22, C12, m)
+    C21 = straightforward_divide_and_conquer_matrix_multiplication(A21, B11, C21, m)
+    C21 = straightforward_divide_and_conquer_matrix_multiplication(A22, B21, C21, m)
+    C22 = straightforward_divide_and_conquer_matrix_multiplication(A21, B12, C22, m)
+    C22 = straightforward_divide_and_conquer_matrix_multiplication(A22, B22, C22, m)
 
-#     C[:m, :m] = C11
-#     C[:m, m:] = C12
-#     C[m:, :m] = C21
-#     C[m:, m:] = C22
-
-# write a divide and conquer matrix multiplication algorithm
-# that takes two n x n matrices A and B and returns their product C = A * B
-# def divide_and_conquer_matrix_multiplication(A, B, C, n):
-#     if n == 1:
-#         C[0][0] = A[0][0] * B[0][0]
-#         return
-
-#     m = n // 2
-#     A11, A12, A21, A22 = A[:m, :m], A[:m, m:], A[m:, :m], A[m:, m:]
-#     B11, B12, B21, B22 = B[:m, :m], B[:m, m:], B[m:, :m], B[m:, m:]
-#     C11, C12, C21, C22 = C[:m, :m], C[:m, m:], C[m:, :m], C[m:, m:]
-
-#     divide_and_conquer_matrix_multiplication(A11, B11, C11, m)
-#     divide_and_conquer_matrix_multiplication(A12, B21, C11, m)
-#     divide_and_conquer_matrix_multiplication(A11, B12, C12, m)
-#     divide_and_conquer_matrix_multiplication(A12, B22, C12, m)
-#     divide_and_conquer_matrix_multiplication(A21, B11, C21, m)
-#     divide_and_conquer_matrix_multiplication(A22, B21, C21, m)
-#     divide_and_conquer_matrix_multiplication(A21, B12, C22, m)
-
+    for i in range(m):
+        C[i][:m] = C11[i]
+        C[i][m:] = C12[i]
+        C[i+m][:m] = C21[i]
+        C[i+m][m:] = C22[i]
+    return C
 
 
 A_matrix = []
@@ -174,7 +169,8 @@ def writeMatrixToFile(filename, matrix):
 if __name__ == '__main__':
     readMatrixFromFile('myfile.txt')
     # C_matrix = StraightDivAndConq(A_matrix, B_matrix)
-    C = [[0]*n_value]*n_value
+    C = [[int(0)]*n_value]*n_value
 
     C_matrix = straightforward_divide_and_conquer_matrix_multiplication(A_matrix, B_matrix, C, n_value)
-    writeMatrixToFile('myfile.out', C_matrix)
+    print(C_matrix)
+    # writeMatrixToFile('myfile.out', C_matrix)
