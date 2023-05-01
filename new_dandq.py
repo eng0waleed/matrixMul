@@ -96,9 +96,6 @@ def multiply_matrix(A, B):
                 C_01[i][j] = c3[i][j] + c4[i][j]
                 C_10[i][j] = c5[i][j] + c6[i][j]
                 C_11[i][j] = c7[i][j] + c8[i][j]
-
-        for i in range(m):
-            for j in range(m):
                 C[i][j] = C_00[i][j]
                 C[i][j + m] = C_01[i][j]
                 C[m + i][j] = C_10[i][j]
