@@ -54,6 +54,13 @@ def multiply_matrices(args):
 def split_matrix(A, start_row, end_row, start_col, end_col):
     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
 
+
+def combine_results(C, submatrix1, submatrix2, start_row, start_col):
+    for i in range(len(submatrix1)):
+        for j in range(len(submatrix1[0])):
+            C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
+
+
 # Function to multiply two matrices
 def multiply_matrix(A, B, num_processes=8, threshold=64):
     n = len(A[0])
@@ -103,12 +110,18 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
             ])
 
         # Combine the results
-        for i in range(m):
-            for j in range(m):
-                C[i][j] = c1[i][j] + c2[i][j]
-                C[i][j + m] = c3[i][j] + c4[i][j]
-                C[m + i][j] = c5[i][j] + c6[i][j]
-                C[m + i][j + m] = c7[i][j] + c8[i][j]
+        # for i in range(m):
+        #     for j in range(m):
+        #         C[i][j] = c1[i][j] + c2[i][j]
+        #         C[i][j + m] = c3[i][j] + c4[i][j]
+        #         C[m + i][j] = c5[i][j] + c6[i][j]
+        #         C[m + i][j + m] = c7[i][j] + c8[i][j]
+        
+        # Parallelize the combination of the results
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(combine_results, [C]*4, [c1, c3, c5, c7], [c2, c4, c6, c8],
+                         [0, 0, m, m], [0, m, 0, m])
+
 
     return C
 
