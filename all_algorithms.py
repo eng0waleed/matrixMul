@@ -50,6 +50,10 @@ def initWithZeros(a, r, c):
 def multiply_matrices(args):
     return multiply_matrix(*args)
 
+
+def split_matrix(A, start_row, end_row, start_col, end_col):
+    return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
+
 # Function to multiply two matrices
 def multiply_matrix(A, B, num_processes=8, threshold=64):
     n = len(A[0])
@@ -66,15 +70,30 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         m = n // 2
 
         # Split the matrices into 4 submatrices
-        a00 = [[A[i][j] for j in range(m)] for i in range(m)]
-        a01 = [[A[i][j] for j in range(m, n)] for i in range(m)]
-        a10 = [[A[i][j] for j in range(m)] for i in range(m, n)]
-        a11 = [[A[i][j] for j in range(m, n)] for i in range(m, n)]
+        # a00 = [[A[i][j] for j in range(m)] for i in range(m)]
+        # a01 = [[A[i][j] for j in range(m, n)] for i in range(m)]
+        # a10 = [[A[i][j] for j in range(m)] for i in range(m, n)]
+        # a11 = [[A[i][j] for j in range(m, n)] for i in range(m, n)]
 
-        b00 = [[B[i][j] for j in range(m)] for i in range(m)]
-        b01 = [[B[i][j] for j in range(m, n)] for i in range(m)]
-        b10 = [[B[i][j] for j in range(m)] for i in range(m, n)]
-        b11 = [[B[i][j] for j in range(m, n)] for i in range(m, n)]
+        # b00 = [[B[i][j] for j in range(m)] for i in range(m)]
+        # b01 = [[B[i][j] for j in range(m, n)] for i in range(m)]
+        # b10 = [[B[i][j] for j in range(m)] for i in range(m, n)]
+        # b11 = [[B[i][j] for j in range(m, n)] for i in range(m, n)]
+
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+        #     a00, a01, a10, a11, b00, b01, b10, b11 = executor.map(split_matrix, [
+        #         (A, 0, m, 0, m), (A, 0, m, m, n), (A, m, n, 0, m), (A, m, n, m, n),
+        #         (B, 0, m, 0, m), (B, 0, m, m, n), (B, m, n, 0, m), (B, m, n, m, n)
+        #     ])
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+            a00, a01, a10, a11, b00, b01, b10, b11 = executor.map(split_matrix, 
+                [A, A, A, A, B, B, B, B], 
+                [0, 0, m, m, 0, 0, m, m], 
+                [m, m, n, n, m, m, n, n], 
+                [0, m, 0, m, 0, m, 0, m], 
+                [m, n, m, n, m, n, m, n]
+            )
+
 
         # Create a process pool and submit matrix multiplication tasks
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
@@ -310,15 +329,15 @@ def strassen_parallel(A, B):
 
 
 def main():
-    input_filename = 'myfile.txt'
+    input_filename = 'big_10_matrices.txt'
 
     readMatrixFromFile(input_filename)
 
     methods = [
-        ('StraightDivAndConq', multiply_matrix),
+        ('StraightDivAndConqP', multiply_matrix),
         ('StraightDivAndConqSeq', multiply_matrix_seq),
-        ('StrassenSeq', strassen_sequential),
-        ('StrassenParallel', strassen_parallel),
+        # ('StrassenSeq', strassen_sequential),
+        # ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
 
