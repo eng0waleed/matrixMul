@@ -118,7 +118,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         #         C[m + i][j + m] = c7[i][j] + c8[i][j]
         
         # Parallelize the combination of the results
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             executor.map(combine_results, [C]*4, [c1, c3, c5, c7], [c2, c4, c6, c8],
                          [0, 0, m, m], [0, m, 0, m])
 
