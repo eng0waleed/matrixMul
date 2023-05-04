@@ -110,19 +110,27 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
             ])
 
         # Combine the results
-        # for i in range(m):
-        #     for j in range(m):
-        #         C[i][j] = c1[i][j] + c2[i][j]
-        #         C[i][j + m] = c3[i][j] + c4[i][j]
-        #         C[m + i][j] = c5[i][j] + c6[i][j]
-        #         C[m + i][j + m] = c7[i][j] + c8[i][j]
+        for i in range(m):
+            for j in range(m):
+                C[i][j] = c1[i][j] + c2[i][j]
+                C[i][j + m] = c3[i][j] + c4[i][j]
+                C[m + i][j] = c5[i][j] + c6[i][j]
+                C[m + i][j + m] = c7[i][j] + c8[i][j]
         
         # Parallelize the combination of the results
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
+        #     executor.map(combine_results, [C]*4, [c1, c3, c5, c7], [c2, c4, c6, c8],
+        #                  [0, 0, m, m], [0, m, 0, m])
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
-            executor.map(combine_results, [C]*4, [c1, c3, c5, c7], [c2, c4, c6, c8],
-                         [0, 0, m, m], [0, m, 0, m])
-
-
+            futures = {executor.submit(combine_results, input)
+                       for input in [
+                           (C,c1,c2,0,0),
+                           (C,c3,c4,0,0),
+                           (C, c5, c6, m, m),
+                           (C, c7, c8, m, m),
+                       ]
+                       }
+            concurrent.futures.wait(futures)
     return C
 
 A_matrix = []
