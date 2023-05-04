@@ -181,6 +181,134 @@ def multiply_matrix_seq(A, B):
     return C
 
 
+def partition_matrix(M, size):
+    n = len(M)
+    a = [[M[i][j] for j in range(size)] for i in range(size)]
+    b = [[M[i][j] for j in range(size, n)] for i in range(size)]
+    c = [[M[i][j] for j in range(size)] for i in range(size, n)]
+    d = [[M[i][j] for j in range(size, n)] for i in range(size, n)]
+    return a, b, c, d
+
+
+def add_matrices(A, B):
+    n = len(A)
+    C = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            C[i][j] = A[i][j] + B[i][j]
+    return C
+
+
+def subtract_matrices(A, B):
+    n = len(A)
+    C = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            C[i][j] = A[i][j] - B[i][j]
+    return C
+
+
+def combine_matrices(C, a11, a12, a21, a22):
+    n = len(a11)
+    for i in range(n):
+        for j in range(n):
+            C[i][j] = a11[i][j]
+            C[i][j + n] = a12[i][j]
+            C[i + n][j] = a21[i][j]
+            C[i + n][j + n] = a22[i][j]
+
+
+def strassen_sequential(A, B):
+    n = len(A)
+    C = [[0] * n for _ in range(n)]
+
+    if n == 1:
+        C[0][0] = A[0][0] * B[0][0]
+    else:
+        newSize = n // 2
+
+        a11, a12, a21, a22 = partition_matrix(A, newSize)
+        b11, b12, b21, b22 = partition_matrix(B, newSize)
+
+        m1 = strassen_sequential(add_matrices(
+            a11, a22), add_matrices(b11, b22))
+        m2 = strassen_sequential(add_matrices(a21, a22), b11)
+        m3 = strassen_sequential(a11, subtract_matrices(b12, b22))
+        m4 = strassen_sequential(a22, subtract_matrices(b21, b11))
+        m5 = strassen_sequential(add_matrices(a11, a12), b22)
+        m6 = strassen_sequential(subtract_matrices(
+            a21, a11), add_matrices(b11, b12))
+        m7 = strassen_sequential(subtract_matrices(
+            a12, a22), add_matrices(b21, b22))
+
+        c11 = add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
+        c12 = add_matrices(m3, m5)
+        c21 = add_matrices(m2, m4)
+        c22 = add_matrices(subtract_matrices(add_matrices(m1, m3), m2), m6)
+
+        combine_matrices(C, c11, c12, c21, c22)
+
+    return C
+
+
+def strassen_parallel(A, B):
+    num_processes = 8 
+    threshold = 64
+    n = len(A)
+    C = [[0] * n for _ in range(n)]
+
+    if n <= threshold:
+        return strassen_sequential(A, B)
+    
+    elif n == 1:
+        C[0][0] = A[0][0] * B[0][0]
+    else:
+        newSize = n // 2
+
+        a11, a12, a21, a22 = partition_matrix(A, newSize)
+        b11, b12, b21, b22 = partition_matrix(B, newSize)
+
+        added_1 = add_matrices(a11, a22)
+        added_2 = add_matrices(b11, b22)
+        added_3 = add_matrices(a21, a22)
+        added_4 = add_matrices(b11, b12)
+        added_5 = add_matrices(a11, a12)
+        added_6 = add_matrices(b21, b22)
+        added_7 = add_matrices(a12, a22)
+        added_8 = add_matrices(b21, b22)
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+            m1, m2, m3, m4, m5, m6, m7 = executor.map(strassen_parallel, [
+                (added_1, added_2),
+                (added_3, b11),
+                (a11, subtract_matrices(b12, b22)),
+                (a22, subtract_matrices(b21, b11)),
+                (added_5, b22),
+                (subtract_matrices(a21, a11), added_4),
+                (subtract_matrices(a12, a22), added_8)
+            ])
+
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+        #     m1, m2, m3, m4, m5, m6, m7 = executor.map(strassen_parallel, [
+        #         (add_matrices(a11, a22), add_matrices(b11, b22)),
+        #         (add_matrices(a21, a22), b11),
+        #         (a11, subtract_matrices(b12, b22)),
+        #         (a22, subtract_matrices(b21, b11)),
+        #         (add_matrices(a11, a12), b22),
+        #         (subtract_matrices(a21, a11), add_matrices(b11, b12)),
+        #         (subtract_matrices(a12, a22), add_matrices(b21, b22))
+        #     ])
+
+        c11 = add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
+        c12 = add_matrices(m3, m5)
+        c21 = add_matrices(m2, m4)
+        c22 = add_matrices(subtract_matrices(add_matrices(m1, m3), m2), m6)
+
+        combine_matrices(C, c11, c12, c21, c22)
+
+    return C
+
+
 def main():
     input_filename = 'myfile.txt'
 
@@ -189,6 +317,8 @@ def main():
     methods = [
         ('StraightDivAndConq', multiply_matrix),
         ('StraightDivAndConqSeq', multiply_matrix_seq),
+        ('StrassenSeq', strassen_sequential),
+        ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
 
@@ -197,13 +327,13 @@ def main():
         C = method(A_matrix, B_matrix)
         elapsed_time = time.time() - start_time
 
-
         output_file = f"{input_filename}_{n_value}_output_{method_name}.txt"
         writeMatrixToFile(output_file, C)
 
         info_file = f"{input_filename}_{n_value}_info_{method_name}.txt"
         with open(info_file, 'w') as f:
             f.write(f"{elapsed_time:.2f} seconds\n")
+
 
 if __name__ == '__main__':
     main()
