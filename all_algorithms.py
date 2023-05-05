@@ -2,10 +2,10 @@
 # product matrix for a given pair of matrices
 # using Divide and Conquer Approach
 import multiprocessing as mp
-# import concurrent.futures
+import concurrent.futures
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
 ROW_1 = 4
 COL_1 = 4
@@ -142,7 +142,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         m = n // 2
 
         # Split the matrices into 4 submatrices
-        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             a00, a01, a10, a11 = executor.map(lambda args: split_matrix(*args), [
                 (A, 0, m, 0, m),
                 (A, 0, m, m, n),
@@ -162,12 +162,13 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
             (a10, b00), (a11, b10), (a10, b01), (a11, b11)
         ]
 
-        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             results = list(executor.map(
                 lambda args: multiply_matrix(*args), inputs))
-
+            concurrent.futures.wait(results)
+            
         # Combine the results
-        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             combine_futures = [
                 executor.submit(lambda args: combine_results(
                     *args), (C, results[0], results[1], 0, 0)),
@@ -180,7 +181,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
             ]
             for future in combine_futures:
                 future.result()
-
+            
     return C
 
 # def multiply_matrix(A, B, num_processes=8, threshold=64):
