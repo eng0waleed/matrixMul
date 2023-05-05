@@ -2,8 +2,10 @@
 # product matrix for a given pair of matrices
 # using Divide and Conquer Approach
 import multiprocessing as mp
-import concurrent.futures
+# import concurrent.futures
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 ROW_1 = 4
 COL_1 = 4
@@ -40,8 +42,6 @@ def add_matrix(matrix_A, matrix_B, matrix_C, m):
             matrix_C[i][j] = matrix_A[i][j] + matrix_B[i][j]
 
 # Function to initialize matrix with zeros
-
-
 def initWithZeros(a, r, c):
     for i in range(r):
         for j in range(c):
@@ -49,6 +49,72 @@ def initWithZeros(a, r, c):
 
 def multiply_matrices(args):
     return multiply_matrix(*args)
+
+
+# def split_matrix(A, start_row, end_row, start_col, end_col):
+#     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
+
+
+# def combine_results(C, submatrix1, submatrix2, start_row, start_col):
+#     for i in range(len(submatrix1)):
+#         for j in range(len(submatrix1[0])):
+#             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
+
+
+# # Function to multiply two matrices
+# def multiply_matrix(A, B, num_processes=8, threshold=64):
+#     n = len(A[0])
+#     C = [[0] * n for _ in range(n)]
+
+#     if n <= threshold:
+#         for i in range(n):
+#             for j in range(n):
+#                 for k in range(n):
+#                     C[i][j] += A[i][k] * B[k][j]
+#     elif n == 1:
+#         C[0][0] = A[0][0] * B[0][0]
+#     else:
+#         m = n // 2
+
+#         # Split the matrices into 4 submatrices
+#         a00 = [[A[i][j] for j in range(m)] for i in range(m)]
+#         a01 = [[A[i][j] for j in range(m, n)] for i in range(m)]
+#         a10 = [[A[i][j] for j in range(m)] for i in range(m, n)]
+#         a11 = [[A[i][j] for j in range(m, n)] for i in range(m, n)]
+
+#         b00 = [[B[i][j] for j in range(m)] for i in range(m)]
+#         b01 = [[B[i][j] for j in range(m, n)] for i in range(m)]
+#         b10 = [[B[i][j] for j in range(m)] for i in range(m, n)]
+#         b11 = [[B[i][j] for j in range(m, n)] for i in range(m, n)]
+
+#         # Create a process pool and submit matrix multiplication tasks
+#         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
+#             c1, c2, c3, c4, c5, c6, c7, c8 = executor.map(multiply_matrices, [
+#                 (a00, b00), (a01, b10), (a00, b01), (a01, b11),
+#                 (a10, b00), (a11, b10), (a10, b01), (a11, b11)
+#             ])
+
+#         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
+#             futures = {executor.submit(combine_results, input)
+#                        for input in [
+#                            (C,c1,c2,0,0),
+#                            (C,c3,c4,0,0),
+#                            (C, c5, c6, m, m),
+#                            (C, c7, c8, m, m),
+#                        ]
+#                        }
+#             concurrent.futures.wait(futures)
+#     return C
+
+
+# def split_matrix(A, start_row, end_row, start_col, end_col):
+#     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
+
+
+# def combine_results(C, submatrix1, submatrix2, start_row, start_col):
+#     for i in range(len(submatrix1)):
+#         for j in range(len(submatrix1[0])):
+#             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
 
 
 def split_matrix(A, start_row, end_row, start_col, end_col):
@@ -61,7 +127,6 @@ def combine_results(C, submatrix1, submatrix2, start_row, start_col):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
 
 
-# Function to multiply two matrices
 def multiply_matrix(A, B, num_processes=8, threshold=64):
     n = len(A[0])
     C = [[0] * n for _ in range(n)]
@@ -77,61 +142,96 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         m = n // 2
 
         # Split the matrices into 4 submatrices
-        a00 = [[A[i][j] for j in range(m)] for i in range(m)]
-        a01 = [[A[i][j] for j in range(m, n)] for i in range(m)]
-        a10 = [[A[i][j] for j in range(m)] for i in range(m, n)]
-        a11 = [[A[i][j] for j in range(m, n)] for i in range(m, n)]
-
-        b00 = [[B[i][j] for j in range(m)] for i in range(m)]
-        b01 = [[B[i][j] for j in range(m, n)] for i in range(m)]
-        b10 = [[B[i][j] for j in range(m)] for i in range(m, n)]
-        b11 = [[B[i][j] for j in range(m, n)] for i in range(m, n)]
-
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        #     a00, a01, a10, a11, b00, b01, b10, b11 = executor.map(split_matrix, [
-        #         (A, 0, m, 0, m), (A, 0, m, m, n), (A, m, n, 0, m), (A, m, n, m, n),
-        #         (B, 0, m, 0, m), (B, 0, m, m, n), (B, m, n, 0, m), (B, m, n, m, n)
-        #     ])
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        #     a00, a01, a10, a11, b00, b01, b10, b11 = executor.map(split_matrix, 
-        #         [A, A, A, A, B, B, B, B], 
-        #         [0, 0, m, m, 0, 0, m, m], 
-        #         [m, m, n, n, m, m, n, n], 
-        #         [0, m, 0, m, 0, m, 0, m], 
-        #         [m, n, m, n, m, n, m, n]
-        #     )
-
-
-        # Create a process pool and submit matrix multiplication tasks
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
-            c1, c2, c3, c4, c5, c6, c7, c8 = executor.map(multiply_matrices, [
-                (a00, b00), (a01, b10), (a00, b01), (a01, b11),
-                (a10, b00), (a11, b10), (a10, b01), (a11, b11)
+        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+            a00, a01, a10, a11 = executor.map(lambda args: split_matrix(*args), [
+                (A, 0, m, 0, m),
+                (A, 0, m, m, n),
+                (A, m, n, 0, m),
+                (A, m, n, m, n)
             ])
 
+            b00, b01, b10, b11 = executor.map(lambda args: split_matrix(*args), [
+                (B, 0, m, 0, m),
+                (B, 0, m, m, n),
+                (B, m, n, 0, m),
+                (B, m, n, m, n)
+            ])
+
+        inputs = [
+            (a00, b00), (a01, b10), (a00, b01), (a01, b11),
+            (a10, b00), (a11, b10), (a10, b01), (a11, b11)
+        ]
+
+        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+            results = list(executor.map(
+                lambda args: multiply_matrix(*args), inputs))
+
         # Combine the results
-        for i in range(m):
-            for j in range(m):
-                C[i][j] = c1[i][j] + c2[i][j]
-                C[i][j + m] = c3[i][j] + c4[i][j]
-                C[m + i][j] = c5[i][j] + c6[i][j]
-                C[m + i][j + m] = c7[i][j] + c8[i][j]
-        
-        # Parallelize the combination of the results
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
-        #     executor.map(combine_results, [C]*4, [c1, c3, c5, c7], [c2, c4, c6, c8],
-        #                  [0, 0, m, m], [0, m, 0, m])
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
-            futures = {executor.submit(combine_results, input)
-                       for input in [
-                           (C,c1,c2,0,0),
-                           (C,c3,c4,0,0),
-                           (C, c5, c6, m, m),
-                           (C, c7, c8, m, m),
-                       ]
-                       }
-            concurrent.futures.wait(futures)
+        with ThreadPoolExecutor(max_workers=num_processes) as executor:
+            combine_futures = [
+                executor.submit(lambda args: combine_results(
+                    *args), (C, results[0], results[1], 0, 0)),
+                executor.submit(lambda args: combine_results(
+                    *args), (C, results[2], results[3], 0, m)),
+                executor.submit(lambda args: combine_results(
+                    *args), (C, results[4], results[5], m, 0)),
+                executor.submit(lambda args: combine_results(
+                    *args), (C, results[6], results[7], m, m))
+            ]
+            for future in combine_futures:
+                future.result()
+
     return C
+
+# def multiply_matrix(A, B, num_processes=8, threshold=64):
+#     n = len(A[0])
+#     C = [[0] * n for _ in range(n)]
+
+#     if n <= threshold:
+#         for i in range(n):
+#             for j in range(n):
+#                 for k in range(n):
+#                     C[i][j] += A[i][k] * B[k][j]
+#     elif n == 1:
+#         C[0][0] = A[0][0] * B[0][0]
+#     else:
+#         m = n // 2
+
+#         # Split the matrices into 4 submatrices
+#         a00 = split_matrix(A, 0, m, 0, m)
+#         a01 = split_matrix(A, 0, m, m, n)
+#         a10 = split_matrix(A, m, n, 0, m)
+#         a11 = split_matrix(A, m, n, m, n)
+
+#         b00 = split_matrix(B, 0, m, 0, m)
+#         b01 = split_matrix(B, 0, m, m, n)
+#         b10 = split_matrix(B, m, n, 0, m)
+#         b11 = split_matrix(B, m, n, m, n)
+
+#         inputs = [
+#             (a00, b00), (a01, b10), (a00, b01), (a01, b11),
+#             (a10, b00), (a11, b10), (a10, b01), (a11, b11)
+#         ]
+
+#         with ThreadPoolExecutor(max_workers=num_processes) as executor:
+#             results = list(executor.map(
+#                 lambda args: multiply_matrix(*args), inputs))
+
+
+#         # Combine the results
+#         combine_results(C, results[0], results[1], 0, 0)
+#         combine_results(C, results[2], results[3], 0, m)
+#         combine_results(C, results[4], results[5], m, 0)
+#         combine_results(C, results[6], results[7], m, m)
+
+#     return C
+
+
+
+# def multiply_matrix_thread(input, results, index):
+#     A, B = input
+#     C = multiply_matrix(A, B)
+#     results[index] = C
 
 A_matrix = []
 B_matrix = []
@@ -350,7 +450,7 @@ def strassen_parallel(A, B):
 
 
 def main():
-    input_filename = 'big_9_matrices.txt'
+    input_filename = 'big_10_matrices.txt'
 
     readMatrixFromFile(input_filename)
 
