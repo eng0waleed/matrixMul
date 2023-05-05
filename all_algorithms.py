@@ -504,7 +504,7 @@ def strassen_parallel(A, B):
 
 
 def main():
-    input_filename = 'big_10_matrices.txt'
+    input_filename = 'myfile.txt'
 
     readMatrixFromFile(input_filename)
 
