@@ -464,7 +464,7 @@ def main():
 
         for method_name, method in seq_methods:
             start_time = time.time()
-            C = method(A_matrix, B_matrix, num_proc)
+            C = method(A_matrix, B_matrix)
             elapsed_time = time.time() - start_time
 
             output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
