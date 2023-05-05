@@ -446,7 +446,7 @@ def main():
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
-    for index in [4, 6, 8, 10, 12]:
+    for index in [4, 8, 10, 12]:
         input_filename = 'test_power_'+str(index)+'_matrices.txt'
         readMatrixFromFile(input_filename)
 
