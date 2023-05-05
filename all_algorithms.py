@@ -449,7 +449,7 @@ def main():
     ]
     
     for method_name, method in par_methods:
-        for index in [8,9,10,11,12]:
+        for index in [4,6,8,10,12]:
             input_filename = 'test_power_'+index+'_matrices.txt'
             start_time = time.time()
             C = method(A_matrix, B_matrix, num_proc)
@@ -463,7 +463,7 @@ def main():
                 f.write(f"{elapsed_time:.2f} seconds\n")
 
     for method_name, method in seq_methods:
-        for index in [8, 9, 10, 11, 12]:
+        for index in [4, 6, 8, 10, 12]:
             input_filename = 'test_power_'+index+'_matrices.txt'
             start_time = time.time()
             C = method(A_matrix, B_matrix, num_proc)
