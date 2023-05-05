@@ -43,10 +43,10 @@ def generate_matrix_parallel(n, num_processes):
 
 
 if __name__ == '__main__':
-    n = int(input("enter value: "))
-    n = 2**n
+    _n = int(input("enter value: "))
+    n = 2**_n
     num_processes = 450
 
     A_matrix = generate_matrix_parallel(n, num_processes)
     B_matrix = generate_matrix_parallel(n, num_processes)
-    save_matrix_to_file(f"test_power_{n}_matrices.txt", n, A_matrix, B_matrix)
+    save_matrix_to_file(f"test_power_{_n}_matrices.txt", n, A_matrix, B_matrix)
