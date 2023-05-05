@@ -432,7 +432,6 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
 
 
 def main():
-    input_filename = 'big_8_matrices.txt'
     num_proc = 8
     
     readMatrixFromFile(input_filename)
@@ -450,28 +449,33 @@ def main():
     ]
     
     for method_name, method in par_methods:
-        start_time = time.time()
-        C = method(A_matrix, B_matrix, num_proc)
-        elapsed_time = time.time() - start_time
+        for index in [8,9,10,11,12]:
+            input_filename = 'test_power_'+index+'_matrices.txt'
+            start_time = time.time()
+            C = method(A_matrix, B_matrix, num_proc)
+            elapsed_time = time.time() - start_time
 
-        output_file = f"{input_filename}_{n_value}_output_{method_name}.txt"
-        writeMatrixToFile(output_file, C)
+            output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
+            writeMatrixToFile(output_file, C)
 
-        info_file = f"{input_filename}_{n_value}_info_{method_name}.txt"
-        with open(info_file, 'w') as f:
-            f.write(f"{elapsed_time:.2f} seconds\n")
+            info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
+            with open(info_file, 'w') as f:
+                f.write(f"{elapsed_time:.2f} seconds\n")
 
     for method_name, method in seq_methods:
-        start_time = time.time()
-        C = method(A_matrix, B_matrix)
-        elapsed_time = time.time() - start_time
+        for index in [8, 9, 10, 11, 12]:
+            input_filename = 'test_power_'+index+'_matrices.txt'
+            start_time = time.time()
+            C = method(A_matrix, B_matrix, num_proc)
+            elapsed_time = time.time() - start_time
 
-        output_file = f"{input_filename}_{n_value}_output_{method_name}.txt"
-        writeMatrixToFile(output_file, C)
+            output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
+            writeMatrixToFile(output_file, C)
 
-        info_file = f"{input_filename}_{n_value}_info_{method_name}.txt"
-        with open(info_file, 'w') as f:
-            f.write(f"{elapsed_time:.2f} seconds\n")
+            info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
+            with open(info_file, 'w') as f:
+                f.write(f"{elapsed_time:.2f} seconds\n")
+
 
 
 if __name__ == '__main__':
