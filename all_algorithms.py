@@ -375,8 +375,6 @@ def strassen_sequential(A, B):
 #     return C
 
 def strassen_parallel(A, B, num_processes=8, threshold=64):
-    num_processes = 8
-    threshold = 64
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
@@ -390,10 +388,10 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
     else:
-        newSize = n // 2
+        n = n // 2
 
-        a11, a12, a21, a22 = partition_matrix(A, newSize)
-        b11, b12, b21, b22 = partition_matrix(B, newSize)
+        a11, a12, a21, a22 = partition_matrix(A, n)
+        b11, b12, b21, b22 = partition_matrix(B, n)
 
         
         add_a11_a22 = add_matrices(a11, a22)
