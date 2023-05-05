@@ -59,10 +59,11 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
     C = [[0] * n for _ in range(n)]
 
     if n <= threshold:
-        for i in range(n):
-            for j in range(n):
-                for k in range(n):
-                    C[i][j] += A[i][k] * B[k][j]
+        # for i in range(n):
+        #     for j in range(n):
+        #         for k in range(n):
+        #             C[i][j] += A[i][k] * B[k][j]
+        C = multiply_matrix_seq(A,B)
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
     else:
@@ -265,15 +266,123 @@ def strassen_sequential(A, B):
     return C
 
 
+# def strassen_parallel(A, B):
+#     num_processes = 8 
+#     threshold = 64
+#     n = len(A)
+#     C = [[0] * n for _ in range(n)]
+
+#     if n <= threshold:
+#         return strassen_sequential(A, B)
+    
+#     elif n == 1:
+#         C[0][0] = A[0][0] * B[0][0]
+#     else:
+#         newSize = n // 2
+
+#         a11, a12, a21, a22 = partition_matrix(A, newSize)
+#         b11, b12, b21, b22 = partition_matrix(B, newSize)
+
+#         # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+#         #     m1, m2, m3, m4, m5, m6, m7 = executor.map(strassen_parallel, [
+#         #         (add_matrices(a11, a22), add_matrices(b11, b22)),
+#         #         (add_matrices(a21, a22), b11),
+#         #         (a11, subtract_matrices(b12, b22)),
+#         #         (a22, subtract_matrices(b21, b11)),
+#         #         (add_matrices(a11, a12), b22),
+#         #         (subtract_matrices(a21, a11), add_matrices(b11, b12)),
+#         #         (subtract_matrices(a12, a22), add_matrices(b21, b22))
+#         #     ])
+        
+#         add_a11_a22 = [[0] * n for _ in range(n)]
+#         add_b11_b22 = [[0] * n for _ in range(n)]
+#         add_a21_a22 = [[0] * n for _ in range(n)]
+#         sub_b12_b22 = [[0] * n for _ in range(n)]
+#         sub_a21_a11 = [[0] * n for _ in range(n)]
+#         sub_a12_a22 = [[0] * n for _ in range(n)]
+#         add_a11_a12 = [[0] * n for _ in range(n)]
+#         add_b11_b12 = [[0] * n for _ in range(n)]
+#         add_b21_b22 = [[0] * n for _ in range(n)]
+
+#         for i in range(n):
+#             for j in range(n):
+#                 add_a11_a22 = a11[i][j] + a22[i][j]
+#                 add_b11_b22 = b11[i][j] + b22[i][j]
+#                 add_a21_a22 = a21[i][j] + a22[i][j]
+#                 sub_b12_b22 = b12[i][j] - b22[i][j]
+#                 sub_a21_a11 = a21[i][j] - a11[i][j]
+#                 sub_b21_b11 = b21[i][j] - b11[i][j]
+#                 sub_a12_a22 = a12[i][j] - a22[i][j]
+#                 add_a11_a12 = a11[i][j] + a12[i][j]
+#                 add_b11_b12 = b11[i][j] + b12[i][j]
+#                 add_b21_b22 = b21[i][j] + b22[i][j]
+
+#         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+#             futures = [
+#                 executor.submit(strassen_parallel, add_a11_a22, add_b11_b22),
+#                 executor.submit(strassen_parallel, add_a21_a22, b11),
+#                 executor.submit(strassen_parallel, a11, sub_b12_b22),
+#                 executor.submit(strassen_parallel, a22, sub_b21_b11),
+#                 executor.submit(strassen_parallel, add_a11_a12, b22),
+#                 executor.submit(strassen_parallel, sub_a21_a11, add_b11_b12),
+#                 executor.submit(strassen_parallel, sub_a12_a22, add_b21_b22)
+#             ]
+
+#             m1, m2, m3, m4, m5, m6, m7 = [
+#                 future.result() for future in futures]
+
+        
+#         # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+#         #     futures = [
+#         #         executor.submit(strassen_parallel, add_matrices(
+#         #             a11, a22), add_matrices(b11, b22)),
+#         #         executor.submit(strassen_parallel, add_matrices(a21, a22), b11),
+#         #         executor.submit(strassen_parallel, a11,
+#         #                         subtract_matrices(b12, b22)),
+#         #         executor.submit(strassen_parallel, a22,
+#         #                         subtract_matrices(b21, b11)),
+#         #         executor.submit(strassen_parallel, add_matrices(a11, a12), b22),
+#         #         executor.submit(strassen_parallel, subtract_matrices(
+#         #             a21, a11), add_matrices(b11, b12)),
+#         #         executor.submit(strassen_parallel, subtract_matrices(
+#         #             a12, a22), add_matrices(b21, b22))
+#         #     ]
+
+#         #     m1, m2, m3, m4, m5, m6, m7 = [future.result() for future in futures]
+
+
+#         c11 = add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
+#         c12 = add_matrices(m3, m5)
+#         c21 = add_matrices(m2, m4)
+#         c22 = add_matrices(subtract_matrices(add_matrices(m1, m3), m2), m6)
+#             # Parallelize the computation of c11, c12, c21, and c22
+#         # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+#         #     c11_future = executor.submit(lambda: add_matrices(
+#         #         subtract_matrices(add_matrices(m1, m4), m5), m7))
+#         #     c12_future = executor.submit(lambda: add_matrices(m3, m5))
+#         #     c21_future = executor.submit(lambda: add_matrices(m2, m4))
+#         #     c22_future = executor.submit(lambda: add_matrices(
+#         #         subtract_matrices(add_matrices(m1, m3), m2), m6))
+
+#         #     c11 = c11_future.result()
+#         #     c12 = c12_future.result()
+#         #     c21 = c21_future.result()
+#         #     c22 = c22_future.result()
+
+#         combine_matrices(C, c11, c12, c21, c22)
+
+
+#     return C
+
 def strassen_parallel(A, B):
-    num_processes = 8 
+    num_processes = 8
     threshold = 64
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
     if n <= threshold:
         return strassen_sequential(A, B)
-    
+
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
     else:
@@ -282,61 +391,43 @@ def strassen_parallel(A, B):
         a11, a12, a21, a22 = partition_matrix(A, newSize)
         b11, b12, b21, b22 = partition_matrix(B, newSize)
 
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        #     m1, m2, m3, m4, m5, m6, m7 = executor.map(strassen_parallel, [
-        #         (add_matrices(a11, a22), add_matrices(b11, b22)),
-        #         (add_matrices(a21, a22), b11),
-        #         (a11, subtract_matrices(b12, b22)),
-        #         (a22, subtract_matrices(b21, b11)),
-        #         (add_matrices(a11, a12), b22),
-        #         (subtract_matrices(a21, a11), add_matrices(b11, b12)),
-        #         (subtract_matrices(a12, a22), add_matrices(b21, b22))
-        #     ])
+        add_a11_a22 = add_matrices(a11, a22)
+        add_b11_b22 = add_matrices(b11, b22)
+        add_a21_a22 = add_matrices(a21, a22)
+        sub_b12_b22 = subtract_matrices(b12, b22)
+        sub_a21_a11 = subtract_matrices(a21, a11)
+        sub_b21_b11 = subtract_matrices(b21, b11)
+        sub_a12_a22 = subtract_matrices(a12, a22)
+        add_a11_a12 = add_matrices(a11, a12)
+        add_b11_b12 = add_matrices(b11, b12)
+        add_b21_b22 = add_matrices(b21, b22)
+
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
             futures = [
-                executor.submit(strassen_parallel, add_matrices(
-                    a11, a22), add_matrices(b11, b22)),
-                executor.submit(strassen_parallel, add_matrices(a21, a22), b11),
-                executor.submit(strassen_parallel, a11,
-                                subtract_matrices(b12, b22)),
-                executor.submit(strassen_parallel, a22,
-                                subtract_matrices(b21, b11)),
-                executor.submit(strassen_parallel, add_matrices(a11, a12), b22),
-                executor.submit(strassen_parallel, subtract_matrices(
-                    a21, a11), add_matrices(b11, b12)),
-                executor.submit(strassen_parallel, subtract_matrices(
-                    a12, a22), add_matrices(b21, b22))
+                executor.submit(strassen_parallel, add_a11_a22, add_b11_b22),
+                executor.submit(strassen_parallel, add_a21_a22, b11),
+                executor.submit(strassen_parallel, a11, sub_b12_b22),
+                executor.submit(strassen_parallel, a22, sub_b21_b11),
+                executor.submit(strassen_parallel, add_a11_a12, b22),
+                executor.submit(strassen_parallel, sub_a21_a11, add_b11_b12),
+                executor.submit(strassen_parallel, sub_a12_a22, add_b21_b22)
             ]
 
-            m1, m2, m3, m4, m5, m6, m7 = [future.result() for future in futures]
-
+            m1, m2, m3, m4, m5, m6, m7 = [
+                future.result() for future in futures]
 
         c11 = add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
         c12 = add_matrices(m3, m5)
         c21 = add_matrices(m2, m4)
         c22 = add_matrices(subtract_matrices(add_matrices(m1, m3), m2), m6)
-            # Parallelize the computation of c11, c12, c21, and c22
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        #     c11_future = executor.submit(lambda: add_matrices(
-        #         subtract_matrices(add_matrices(m1, m4), m5), m7))
-        #     c12_future = executor.submit(lambda: add_matrices(m3, m5))
-        #     c21_future = executor.submit(lambda: add_matrices(m2, m4))
-        #     c22_future = executor.submit(lambda: add_matrices(
-        #         subtract_matrices(add_matrices(m1, m3), m2), m6))
-
-        #     c11 = c11_future.result()
-        #     c12 = c12_future.result()
-        #     c21 = c21_future.result()
-        #     c22 = c22_future.result()
 
         combine_matrices(C, c11, c12, c21, c22)
-
 
     return C
 
 
 def main():
-    input_filename = 'myfile.txt'
+    input_filename = 'big_8_matrices.txt'
 
     readMatrixFromFile(input_filename)
 
