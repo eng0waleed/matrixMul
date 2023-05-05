@@ -180,7 +180,7 @@ def combine_results(C, submatrix1, submatrix2, start_row, start_col):
 #                 future.get()
 
 #     return C
-def multiply_matrix(A, B, num_processes=8, threshold=64):
+def multiply_matrix(A, B, num_processes=256, threshold=64):
     n = len(A[0])
     C = [[0] * n for _ in range(n)]
 
