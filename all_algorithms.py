@@ -127,7 +127,60 @@ def combine_results(C, submatrix1, submatrix2, start_row, start_col):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
 
 
-def multiply_matrix(A, B, num_processes=8, threshold=64):
+# def multiply_matrix(args):
+#     A, B = args 
+#     num_processes = 2
+#     threshold = 64
+#     n = len(A[0])
+#     C = [[0] * n for _ in range(n)]
+
+#     if n <= threshold:
+#         for i in range(n):
+#             for j in range(n):
+#                 for k in range(n):
+#                     C[i][j] += A[i][k] * B[k][j]
+#     elif n == 1:
+#         C[0][0] = A[0][0] * B[0][0]
+#     else:
+#         m = n // 2
+
+#         # Split the matrices into 4 submatrices
+#         with mp.Pool(processes=num_processes) as pool:
+#             a00, a01, a10, a11 = pool.map(split_matrix, [
+#                 (A, 0, m, 0, m),
+#                 (A, 0, m, m, n),
+#                 (A, m, n, 0, m),
+#                 (A, m, n, m, n)
+#             ])
+
+#             b00, b01, b10, b11 = pool.map(split_matrix, [
+#                 (B, 0, m, 0, m),
+#                 (B, 0, m, m, n),
+#                 (B, m, n, 0, m),
+#                 (B, m, n, m, n)
+#             ])
+
+#         inputs = [
+#             (a00, b00), (a01, b10), (a00, b01), (a01, b11),
+#             (a10, b00), (a11, b10), (a10, b01), (a11, b11)
+#         ]
+
+#         with mp.Pool(processes=num_processes) as pool:
+#             results = list(pool.map(multiply_matrix, inputs))
+
+#         # Combine the results
+#         with mp.Pool(processes=num_processes) as pool:
+#             combine_futures = [
+#                 pool.apply_async(combine_results(C, results[0], results[1], 0, 0)),
+#                 pool.apply_async(combine_results(C, results[2], results[3], 0, m)),
+#                 pool.apply_async(combine_results(C, results[4], results[5], m, 0)),
+#                 pool.apply_async(combine_results(C, results[6], results[7], m, m))
+#             ]
+#             for future in combine_futures:
+#                 future.get()
+
+#     return C
+def multiply_matrix(A, B, num_processes=256, threshold=64):
     n = len(A[0])
     C = [[0] * n for _ in range(n)]
 
@@ -165,7 +218,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             results = list(executor.map(
                 lambda args: multiply_matrix(*args), inputs))
-            concurrent.futures.wait(results)
+            # concurrent.futures.wait(results)
             
         # Combine the results
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
@@ -299,14 +352,14 @@ def multiply_matrix_seq(A, B):
                 b10[i][j] = B[m + i][j]
                 b11[i][j] = B[i + m][j + m]
 
-        c1 = multiply_matrix(a00, b00)
-        c2 = multiply_matrix(a01, b10)
-        c3 = multiply_matrix(a00, b01)
-        c4 = multiply_matrix(a01, b11)
-        c5 = multiply_matrix(a10, b00)
-        c6 = multiply_matrix(a11, b10)
-        c7 = multiply_matrix(a10, b01)
-        c8 = multiply_matrix(a11, b11)
+        c1 = multiply_matrix_seq(a00, b00)
+        c2 = multiply_matrix_seq(a01, b10)
+        c3 = multiply_matrix_seq(a00, b01)
+        c4 = multiply_matrix_seq(a01, b11)
+        c5 = multiply_matrix_seq(a10, b00)
+        c6 = multiply_matrix_seq(a11, b10)
+        c7 = multiply_matrix_seq(a10, b01)
+        c8 = multiply_matrix_seq(a11, b11)
 
         for i in range(m):
             for j in range(m):
@@ -451,7 +504,7 @@ def strassen_parallel(A, B):
 
 
 def main():
-    input_filename = 'big_10_matrices.txt'
+    input_filename = 'myfile.txt'
 
     readMatrixFromFile(input_filename)
 
