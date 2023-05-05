@@ -103,7 +103,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
 
 
         # Create a process pool and submit matrix multiplication tasks
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             c1, c2, c3, c4, c5, c6, c7, c8 = executor.map(multiply_matrices, [
                 (a00, b00), (a01, b10), (a00, b01), (a01, b11),
                 (a10, b00), (a11, b10), (a10, b01), (a11, b11)
