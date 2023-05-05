@@ -434,7 +434,6 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
 def main():
     num_proc = 8
     
-    readMatrixFromFile(input_filename)
 
     seq_methods = [
         ('StraightDivAndConqSeq', multiply_matrix_seq),
@@ -447,10 +446,11 @@ def main():
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
-    
-    for method_name, method in par_methods:
-        for index in [4,6,8,10,12]:
-            input_filename = 'test_power_'+index+'_matrices.txt'
+    for index in [4, 6, 8, 10, 12]:
+        input_filename = 'test_power_'+index+'_matrices.txt'
+        readMatrixFromFile(input_filename)
+
+        for method_name, method in par_methods:
             start_time = time.time()
             C = method(A_matrix, B_matrix, num_proc)
             elapsed_time = time.time() - start_time
@@ -462,9 +462,7 @@ def main():
             with open(info_file, 'w') as f:
                 f.write(f"{elapsed_time:.2f} seconds\n")
 
-    for method_name, method in seq_methods:
-        for index in [4, 6, 8, 10, 12]:
-            input_filename = 'test_power_'+index+'_matrices.txt'
+        for method_name, method in seq_methods:
             start_time = time.time()
             C = method(A_matrix, B_matrix, num_proc)
             elapsed_time = time.time() - start_time
