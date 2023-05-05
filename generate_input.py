@@ -11,8 +11,9 @@ def save_matrix_to_file(filename, n, matrix_A, matrix_B):
         for row in matrix_B:
             f.write(" ".join(str(x) for x in row) + "\n")
 
-if __name__ == '__main__':
-    n = 2**9
+if __name__ == '__main__':    
+    n = int(input("enter value: "))
+    n = 2**n
     A_matrix = generate_matrix(n)
     B_matrix = generate_matrix(n)
-    save_matrix_to_file("big_9_matrices.txt", n, A_matrix, B_matrix)
+    save_matrix_to_file(f"test_power_{n}_matrices.txt", n, A_matrix, B_matrix)

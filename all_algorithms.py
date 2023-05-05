@@ -59,11 +59,11 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
     C = [[0] * n for _ in range(n)]
 
     if n <= threshold:
-        # for i in range(n):
-        #     for j in range(n):
-        #         for k in range(n):
-        #             C[i][j] += A[i][k] * B[k][j]
-        C = multiply_matrix_seq(A,B)
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    C[i][j] += A[i][k] * B[k][j]
+        # C = multiply_matrix_seq(A,B)
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
     else:
@@ -374,14 +374,18 @@ def strassen_sequential(A, B):
 
 #     return C
 
-def strassen_parallel(A, B):
+def strassen_parallel(A, B, num_processes=8, threshold=64):
     num_processes = 8
     threshold = 64
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
     if n <= threshold:
-        return strassen_sequential(A, B)
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    C[i][j] += A[i][k] * B[k][j]
+        # return strassen_sequential(A, B)
 
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
@@ -391,6 +395,7 @@ def strassen_parallel(A, B):
         a11, a12, a21, a22 = partition_matrix(A, newSize)
         b11, b12, b21, b22 = partition_matrix(B, newSize)
 
+        
         add_a11_a22 = add_matrices(a11, a22)
         add_b11_b22 = add_matrices(b11, b22)
         add_a21_a22 = add_matrices(a21, a22)
@@ -428,18 +433,35 @@ def strassen_parallel(A, B):
 
 def main():
     input_filename = 'big_8_matrices.txt'
-
+    num_proc = 8
+    
     readMatrixFromFile(input_filename)
 
-    methods = [
-        ('StraightDivAndConqP', multiply_matrix),
+    seq_methods = [
         ('StraightDivAndConqSeq', multiply_matrix_seq),
         ('StrassenSeq', strassen_sequential),
+        # Add other multiplication methods here
+    ]
+    
+    par_methods = [
+        ('StraightDivAndConqP', multiply_matrix),
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
+    
+    for method_name, method in par_methods:
+        start_time = time.time()
+        C = method(A_matrix, B_matrix, num_proc)
+        elapsed_time = time.time() - start_time
 
-    for method_name, method in methods:
+        output_file = f"{input_filename}_{n_value}_output_{method_name}.txt"
+        writeMatrixToFile(output_file, C)
+
+        info_file = f"{input_filename}_{n_value}_info_{method_name}.txt"
+        with open(info_file, 'w') as f:
+            f.write(f"{elapsed_time:.2f} seconds\n")
+
+    for method_name, method in seq_methods:
         start_time = time.time()
         C = method(A_matrix, B_matrix)
         elapsed_time = time.time() - start_time
