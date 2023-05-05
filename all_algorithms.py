@@ -165,7 +165,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             results = list(executor.map(
                 lambda args: multiply_matrix(*args), inputs))
-            concurrent.futures.wait(results)
+            # concurrent.futures.wait(results)
             
         # Combine the results
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
