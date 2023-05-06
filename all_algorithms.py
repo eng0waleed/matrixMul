@@ -325,6 +325,11 @@ def main():
         info_file = f"{input_filename}_{index}_info_{method_name}.txt"
         with open(info_file, 'w') as f:
             f.write(f"{elapsed_time:.2f} seconds\n")
+            
+        all_info = f"{index}_info.txt"
+        with open(all_info, 'a') as f:
+            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds\n')
+
 
 
 

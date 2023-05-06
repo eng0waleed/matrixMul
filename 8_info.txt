@@ -1,0 +1,4 @@
+  2023-05-06 21: 12: 11 | StraightDivAndConqP	:     1.85 seconds
+  2023-05-06 21: 12: 12 | StraightDivAndConqSeq	:     1.87 seconds
+  2023-05-06 21: 12: 14 | StrassenSeq	:     1.64 seconds
+  2023-05-06 21: 12: 16 | StrassenParallel	:     1.65 seconds
