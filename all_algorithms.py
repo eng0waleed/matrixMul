@@ -52,8 +52,8 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
                 for k in range(n):
                     C[i][j] += A[i][k] * B[k][j]
         # C = multiply_matrix_seq(A,B)
-    elif n == 1:
-        C[0][0] = A[0][0] * B[0][0]
+    # elif n == 1:
+    #     C[0][0] = A[0][0] * B[0][0]
     else:
         m = n // 2
 
@@ -118,12 +118,18 @@ def writeMatrixToFile(filename, matrix):
         for row in matrix:
             f.write(" ".join(str(x) for x in row) + "\n")
 
-def multiply_matrix_seq(A, B):
+
+def multiply_matrix_seq(A, B, threshold=64):
     n = len(A[0])
     C = [[0]*n for _ in range(n)]
 
-    if (n == 1):
-        C[0][0] = A[0][0] * B[0][0]
+    # if (n == 1):
+    #     C[0][0] = A[0][0] * B[0][0]
+    if n <= threshold:
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    C[i][j] += A[i][k] * B[k][j]
 
     else:
         m = n // 2
@@ -211,12 +217,15 @@ def combine_matrices(C, a11, a12, a21, a22):
             C[i + n][j + n] = a22[i][j]
 
 
-def strassen_sequential(A, B):
+def strassen_sequential(A, B, threshold=64):
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
-    if n == 1:
-        C[0][0] = A[0][0] * B[0][0]
+    if n <= threshold:
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    C[i][j] += A[i][k] * B[k][j]
     else:
         newSize = n // 2
 
@@ -248,7 +257,6 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
             for j in range(n):
                 for k in range(n):
                     C[i][j] += A[i][k] * B[k][j]
-        # return strassen_sequential(A, B)
 
     elif n == 1:
         C[0][0] = A[0][0] * B[0][0]
@@ -270,7 +278,7 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
         add_b11_b12 = add_matrices(b11, b12)
         add_b21_b22 = add_matrices(b21, b22)
 
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
             futures = [
                 executor.submit(strassen_parallel, add_a11_a22, add_b11_b22),
                 executor.submit(strassen_parallel, add_a21_a22, b11),
@@ -292,52 +300,6 @@ def strassen_parallel(A, B, num_processes=8, threshold=64):
         combine_matrices(C, c11, c12, c21, c22)
 
     return C
-
-# def main():
-#     num_proc = 8
-    
-
-#     seq_methods = [
-#         ('StraightDivAndConqSeq', multiply_matrix_seq),
-#         ('StrassenSeq', strassen_sequential),
-#         # Add other multiplication methods here
-#     ]
-    
-#     par_methods = [
-#         ('StraightDivAndConqP', multiply_matrix),
-#         ('StrassenParallel', strassen_parallel),
-#         # Add other multiplication methods here
-#     ]
-#     for index in [4, 8]:
-#         input_filename = 'test_power_'+str(index)+'_matrices.txt'
-#         readMatrixFromFile(input_filename)
-
-#         for method_name, method in par_methods:
-#             reset_matrices()
-#             start_time = time.time()
-#             C = method(A_matrix, B_matrix, num_proc)
-#             elapsed_time = time.time() - start_time
-
-#             output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
-#             writeMatrixToFile(output_file, C)
-
-#             info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
-#             with open(info_file, 'w') as f:
-#                 f.write(f"{elapsed_time:.2f} seconds\n")
-
-#         for method_name, method in seq_methods:
-#             reset_matrices()
-#             start_time = time.time()
-#             C = method(A_matrix, B_matrix)
-#             elapsed_time = time.time() - start_time
-
-#             output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
-#             writeMatrixToFile(output_file, C)
-
-#             info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
-#             with open(info_file, 'w') as f:
-#                 f.write(f"{elapsed_time:.2f} seconds\n")
-
 
 def main():
     index = int(input("enter power value for multiply: "))
