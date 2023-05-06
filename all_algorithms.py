@@ -307,9 +307,9 @@ def main():
     readMatrixFromFile(input_filename)
 
     methods = [
-        ('StraightDivAndConqP', multiply_matrix),
-        ('StraightDivAndConqSeq', multiply_matrix_seq),
-        ('StrassenSeq', strassen_sequential),
+        # ('StraightDivAndConqP', multiply_matrix),
+        # ('StraightDivAndConqSeq', multiply_matrix_seq),
+        # ('StrassenSeq', strassen_sequential),
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
