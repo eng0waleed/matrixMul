@@ -80,8 +80,7 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         ]
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-            results = list(executor.map(
-                lambda args: multiply_matrix(*args), inputs))
+            results = list(executor.map(multiply_matrix, inputs))
             # concurrent.futures.wait(results)
             
         # Combine the results
