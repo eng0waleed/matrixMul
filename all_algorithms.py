@@ -43,7 +43,10 @@ def combine_results(C, submatrix1, submatrix2, start_row, start_col):
         for j in range(len(submatrix1[0])):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
 
-def multiply_matrix(A, B, num_processes=8, threshold=64):
+def multiply_matrix(args):
+    num_processes = 8
+    threshold = 64
+    A, B = args
     n = len(A[0])
     C = [[0] * n for _ in range(n)]
 
