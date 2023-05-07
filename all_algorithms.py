@@ -59,14 +59,14 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
 
         # Split the matrices into 4 submatrices
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-            a00, a01, a10, a11 = executor.map(lambda args: split_matrix(*args), [
+            a00, a01, a10, a11 = executor.map(split_matrix, [
                 (A, 0, m, 0, m),
                 (A, 0, m, m, n),
                 (A, m, n, 0, m),
                 (A, m, n, m, n)
             ])
 
-            b00, b01, b10, b11 = executor.map(lambda args: split_matrix(*args), [
+            b00, b01, b10, b11 = executor.map(split_matrix, [
                 (B, 0, m, 0, m),
                 (B, 0, m, m, n),
                 (B, m, n, 0, m),
@@ -86,14 +86,10 @@ def multiply_matrix(A, B, num_processes=8, threshold=64):
         # Combine the results
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
             combine_futures = [
-                executor.submit(lambda args: combine_results(
-                    *args), (C, results[0], results[1], 0, 0)),
-                executor.submit(lambda args: combine_results(
-                    *args), (C, results[2], results[3], 0, m)),
-                executor.submit(lambda args: combine_results(
-                    *args), (C, results[4], results[5], m, 0)),
-                executor.submit(lambda args: combine_results(
-                    *args), (C, results[6], results[7], m, m))
+                executor.submit(combine_results, (C, results[0], results[1], 0, 0)),
+                executor.submit(combine_results, (C, results[2], results[3], 0, m)),
+                executor.submit(combine_results, (C, results[4], results[5], m, 0)),
+                executor.submit(combine_results, (C, results[6], results[7], m, m))
             ]
             for future in combine_futures:
                 future.result()
