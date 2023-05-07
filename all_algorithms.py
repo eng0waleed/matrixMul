@@ -34,7 +34,8 @@ def initWithZeros(a, r, c):
 def multiply_matrices(args):
     return multiply_matrix(*args)
 
-def split_matrix(A, start_row, end_row, start_col, end_col):
+def split_matrix(args):
+    A, start_row, end_row, start_col, end_col = args
     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
 
 def combine_results(C, submatrix1, submatrix2, start_row, start_col):
