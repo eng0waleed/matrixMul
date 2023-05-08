@@ -38,7 +38,8 @@ def split_matrix(args):
     A, start_row, end_row, start_col, end_col = args
     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
 
-def combine_results(C, submatrix1, submatrix2, start_row, start_col):
+def combine_results(args):
+    C, submatrix1, submatrix2, start_row, start_col = args
     for i in range(len(submatrix1)):
         for j in range(len(submatrix1[0])):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
@@ -315,7 +316,11 @@ def main():
 
     for method_name, method in methods:
         start_time = time.time()
-        C = method(A_matrix, B_matrix)
+        if method_name == "StraightDivAndConqP":
+            C = method((A_matrix, B_matrix))
+        else:
+            C = method(A_matrix, B_matrix)
+
         elapsed_time = time.time() - start_time
 
         output_file = f"{input_filename}_{index}_output_{method_name}.txt"
