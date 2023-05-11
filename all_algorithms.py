@@ -13,6 +13,7 @@ A_matrix = []
 B_matrix = []
 A_matrix_temp = []
 B_matrix_temp = []
+num_of_processes = 64
 
 def reset_matrices():
     global A_matrix
@@ -45,7 +46,7 @@ def combine_results(args):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
 
 def multiply_matrix(args):
-    num_processes = 8
+    num_processes = num_of_processes
     threshold = 64
     A, B = args
     n = len(A[0])
@@ -248,7 +249,7 @@ def strassen_sequential(A, B, threshold=64):
         combine_matrices(C, c11, c12, c21, c22)
     return C
 
-def strassen_parallel(A, B, num_processes=8, threshold=64):
+def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
@@ -308,8 +309,8 @@ def main():
 
     methods = [
         ('StraightDivAndConqP', multiply_matrix),
-        ('StraightDivAndConqSeq', multiply_matrix_seq),
-        ('StrassenSeq', strassen_sequential),
+        # ('StraightDivAndConqSeq', multiply_matrix_seq),
+        # ('StrassenSeq', strassen_sequential),
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
@@ -332,7 +333,7 @@ def main():
             
         all_info = f"{index}_info.txt"
         with open(all_info, 'a') as f:
-            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds\n')
+            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {num_of_processes} cores\n')
 
 
 
