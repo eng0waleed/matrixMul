@@ -304,6 +304,7 @@ def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
 
 def main():
     index = int(input("enter power value for multiply: "))
+    num_of_processes = int(input("enter number of processes: "))
     input_filename = 'test_power_'+str(index)+'_matrices.txt'
     readMatrixFromFile(input_filename)
 
