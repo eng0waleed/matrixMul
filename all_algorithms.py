@@ -14,6 +14,7 @@ B_matrix = []
 A_matrix_temp = []
 B_matrix_temp = []
 num_of_processes = 64
+threshold_global = 64
 
 def reset_matrices():
     global A_matrix
@@ -52,7 +53,7 @@ def multiply_matrix(args):
     n = len(A[0])
     C = [[0] * n for _ in range(n)]
 
-    if n <= threshold:
+    if n <= threshold_global:
         for i in range(n):
             for j in range(n):
                 for k in range(n):
@@ -126,7 +127,7 @@ def multiply_matrix_seq(A, B, threshold=64):
 
     # if (n == 1):
     #     C[0][0] = A[0][0] * B[0][0]
-    if n <= threshold:
+    if n <= threshold_global:
         for i in range(n):
             for j in range(n):
                 for k in range(n):
@@ -217,12 +218,11 @@ def combine_matrices(C, a11, a12, a21, a22):
             C[i + n][j] = a21[i][j]
             C[i + n][j + n] = a22[i][j]
 
-
 def strassen_sequential(A, B, threshold=64):
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
-    if n <= threshold:
+    if n <= threshold_global:
         for i in range(n):
             for j in range(n):
                 for k in range(n):
@@ -253,7 +253,7 @@ def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
     n = len(A)
     C = [[0] * n for _ in range(n)]
 
-    if n <= threshold:
+    if n <= threshold_global:
         for i in range(n):
             for j in range(n):
                 for k in range(n):
@@ -305,13 +305,14 @@ def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
 def main():
     index = int(input("enter power value for multiply: "))
     num_of_processes = int(input("enter number of processes: "))
+    threshold_global = int(input("enter number of threshold: "))
     input_filename = 'test_power_'+str(index)+'_matrices.txt'
     readMatrixFromFile(input_filename)
 
     methods = [
         ('StraightDivAndConqP', multiply_matrix),
-        # ('StraightDivAndConqSeq', multiply_matrix_seq),
-        # ('StrassenSeq', strassen_sequential),
+        ('StraightDivAndConqSeq', multiply_matrix_seq),
+        ('StrassenSeq', strassen_sequential),
         ('StrassenParallel', strassen_parallel),
         # Add other multiplication methods here
     ]
@@ -332,9 +333,9 @@ def main():
         with open(info_file, 'w') as f:
             f.write(f"{elapsed_time:.2f} seconds\n")
             
-        all_info = f"{index}_info.txt"
+        all_info = f"{index}_all_info.txt"
         with open(all_info, 'a') as f:
-            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {num_of_processes} cores\n')
+            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {num_of_processes} cores | threshold = {threshold_global} \n')
 
 
 
