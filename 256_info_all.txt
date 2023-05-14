@@ -1,0 +1,24 @@
+
+running all algorithms on 8
+  2023-05-14 04: 02: 44 | StraightDivAndConqSeq	:     1.90 seconds | 1 cores | threshold = 16 
+  2023-05-14 04: 02: 45 | StrassenSeq	:     1.70 seconds | 1 cores | threshold = 16 
+
+running all algorithms on 8
+  2023-05-14 04: 04: 02 | StraightDivAndConqSeq	:     1.88 seconds | 1 cores | threshold = 16 
+  2023-05-14 04: 04: 03 | StrassenSeq	:     1.72 seconds | 1 cores | threshold = 16 
+  2023-05-14 04: 04: 06 | StraightDivAndConqP	:     3.01 seconds | 8 cores | threshold = 16 
+  2023-05-14 04: 04: 08 | StrassenParallel	:     1.29 seconds | 8 cores | threshold = 16 
+  2023-05-14 04: 04: 10 | StraightDivAndConqP	:     2.66 seconds | 16 cores | threshold = 16 
+  2023-05-14 04: 04: 12 | StrassenParallel	:     1.42 seconds | 16 cores | threshold = 16 
+  2023-05-14 04: 04: 15 | StraightDivAndConqP	:     2.93 seconds | 32 cores | threshold = 16 
+  2023-05-14 04: 04: 16 | StrassenParallel	:     1.53 seconds | 32 cores | threshold = 16 
+  2023-05-14 04: 04: 18 | StraightDivAndConqSeq	:     1.99 seconds | 1 cores | threshold = 32 
+  2023-05-14 04: 04: 20 | StrassenSeq	:     1.70 seconds | 1 cores | threshold = 32 
+  2023-05-14 04: 04: 23 | StraightDivAndConqP	:     2.77 seconds | 8 cores | threshold = 32 
+  2023-05-14 04: 04: 24 | StrassenParallel	:     1.44 seconds | 8 cores | threshold = 32 
+  2023-05-14 04: 04: 28 | StraightDivAndConqP	:     3.63 seconds | 16 cores | threshold = 32 
+  2023-05-14 04: 04: 29 | StrassenParallel	:     1.55 seconds | 16 cores | threshold = 32 
+  2023-05-14 04: 04: 33 | StraightDivAndConqP	:     3.40 seconds | 32 cores | threshold = 32 
+  2023-05-14 04: 04: 34 | StrassenParallel	:     1.62 seconds | 32 cores | threshold = 32 
+  2023-05-14 04: 04: 36 | StraightDivAndConqSeq	:     1.93 seconds | 1 cores | threshold = 64 
+  2023-05-14 04: 04: 38 | StrassenSeq	:     1.71 seconds | 1 cores | threshold = 64 

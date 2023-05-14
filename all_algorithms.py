@@ -13,8 +13,9 @@ A_matrix = []
 B_matrix = []
 A_matrix_temp = []
 B_matrix_temp = []
-num_of_processes = 64
+num_of_processes = 8
 threshold_global = 64
+
 
 def reset_matrices():
     global A_matrix
@@ -28,23 +29,28 @@ def add_matrix(matrix_A, matrix_B, matrix_C, m):
         for j in range(m):
             matrix_C[i][j] = matrix_A[i][j] + matrix_B[i][j]
 
+
 def initWithZeros(a, r, c):
     for i in range(r):
         for j in range(c):
             a[i][j] = 0
 
+
 def multiply_matrices(args):
     return multiply_matrix(*args)
+
 
 def split_matrix(args):
     A, start_row, end_row, start_col, end_col = args
     return [[A[i][j] for j in range(start_col, end_col)] for i in range(start_row, end_row)]
+
 
 def combine_results(args):
     C, submatrix1, submatrix2, start_row, start_col = args
     for i in range(len(submatrix1)):
         for j in range(len(submatrix1[0])):
             C[start_row + i][start_col + j] = submatrix1[i][j] + submatrix2[i][j]
+
 
 def multiply_matrix(args):
     num_processes = num_of_processes
@@ -88,19 +94,24 @@ def multiply_matrix(args):
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
             results = list(executor.map(multiply_matrix, inputs))
             # concurrent.futures.wait(results)
-            
+
         # Combine the results
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
             combine_futures = [
-                executor.submit(combine_results, (C, results[0], results[1], 0, 0)),
-                executor.submit(combine_results, (C, results[2], results[3], 0, m)),
-                executor.submit(combine_results, (C, results[4], results[5], m, 0)),
-                executor.submit(combine_results, (C, results[6], results[7], m, m))
+                executor.submit(combine_results,
+                                (C, results[0], results[1], 0, 0)),
+                executor.submit(combine_results,
+                                (C, results[2], results[3], 0, m)),
+                executor.submit(combine_results,
+                                (C, results[4], results[5], m, 0)),
+                executor.submit(combine_results,
+                                (C, results[6], results[7], m, m))
             ]
             for future in combine_futures:
                 future.result()
-            
+
     return C
+
 
 def readMatrixFromFile(filename):
     global A_matrix
@@ -112,6 +123,7 @@ def readMatrixFromFile(filename):
             A_matrix.append([int(x) for x in f.readline().split()])
         for i in range(n):
             B_matrix.append([int(x) for x in f.readline().split()])
+
 
 def writeMatrixToFile(filename, matrix):
     with open(filename, 'w') as f:
@@ -218,6 +230,7 @@ def combine_matrices(C, a11, a12, a21, a22):
             C[i + n][j] = a21[i][j]
             C[i + n][j + n] = a22[i][j]
 
+
 def strassen_sequential(A, B, threshold=64):
     n = len(A)
     C = [[0] * n for _ in range(n)]
@@ -233,13 +246,16 @@ def strassen_sequential(A, B, threshold=64):
         a11, a12, a21, a22 = partition_matrix(A, newSize, n)
         b11, b12, b21, b22 = partition_matrix(B, newSize, n)
 
-        m1 = strassen_sequential(add_matrices(a11, a22), add_matrices(b11, b22))
+        m1 = strassen_sequential(add_matrices(
+            a11, a22), add_matrices(b11, b22))
         m2 = strassen_sequential(add_matrices(a21, a22), b11)
         m3 = strassen_sequential(a11, subtract_matrices(b12, b22))
         m4 = strassen_sequential(a22, subtract_matrices(b21, b11))
         m5 = strassen_sequential(add_matrices(a11, a12), b22)
-        m6 = strassen_sequential(subtract_matrices(a21, a11), add_matrices(b11, b12))
-        m7 = strassen_sequential(subtract_matrices(a12, a22), add_matrices(b21, b22))
+        m6 = strassen_sequential(subtract_matrices(
+            a21, a11), add_matrices(b11, b12))
+        m7 = strassen_sequential(subtract_matrices(
+            a12, a22), add_matrices(b21, b22))
 
         c11 = add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
         c12 = add_matrices(m3, m5)
@@ -248,6 +264,7 @@ def strassen_sequential(A, B, threshold=64):
 
         combine_matrices(C, c11, c12, c21, c22)
     return C
+
 
 def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
     n = len(A)
@@ -267,7 +284,6 @@ def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
         a11, a12, a21, a22 = partition_matrix(A, new_size, n)
         b11, b12, b21, b22 = partition_matrix(B, new_size, n)
 
-        
         add_a11_a22 = add_matrices(a11, a22)
         add_b11_b22 = add_matrices(b11, b22)
         add_a21_a22 = add_matrices(a21, a22)
@@ -302,43 +318,72 @@ def strassen_parallel(A, B, num_processes=num_of_processes, threshold=64):
 
     return C
 
+
 def main():
     index = int(input("enter power value for multiply: "))
-    num_of_processes = int(input("enter number of processes: "))
-    threshold_global = int(input("enter number of threshold: "))
+    # num_of_processes = int(input("enter number of processes: "))
+    # threshold_global = int(input("enter number of threshold: "))
     input_filename = 'test_power_'+str(index)+'_matrices.txt'
     readMatrixFromFile(input_filename)
 
-    methods = [
-        ('StraightDivAndConqP', multiply_matrix),
+    seq_methods = [
         ('StraightDivAndConqSeq', multiply_matrix_seq),
         ('StrassenSeq', strassen_sequential),
-        ('StrassenParallel', strassen_parallel),
-        # Add other multiplication methods here
     ]
 
-    for method_name, method in methods:
-        start_time = time.time()
-        if method_name == "StraightDivAndConqP":
-            C = method((A_matrix, B_matrix))
-        else:
+    paral_methods = [
+        ('StraightDivAndConqP', multiply_matrix),
+        ('StrassenParallel', strassen_parallel),
+    ]
+
+    processes = [8, 16, 32]
+    thresholds = [16, 32, 64, 128]
+
+    all_info = f"{2**index}_info_all.txt"
+    with open(all_info, 'a') as f:
+        f.write(f'\n')
+        f.write(f'running all algorithms on {index}\n')
+    num_of_processes = 1
+    for threshold in thresholds:
+        threshold_global = threshold
+        for method_name, method in seq_methods:
+            start_time = time.time()
             C = method(A_matrix, B_matrix)
 
-        elapsed_time = time.time() - start_time
+            elapsed_time = time.time() - start_time
 
-        output_file = f"{input_filename}_{index}_output_{method_name}.txt"
-        writeMatrixToFile(output_file, C)
+            output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
+            writeMatrixToFile(output_file, C)
 
-        info_file = f"{input_filename}_{index}_info_{method_name}.txt"
-        with open(info_file, 'w') as f:
-            f.write(f"{elapsed_time:.2f} seconds\n")
-            
-        all_info = f"{index}_all_info.txt"
-        with open(all_info, 'a') as f:
-            f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {num_of_processes} cores | threshold = {threshold_global} \n')
+            info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
+            with open(info_file, 'w') as f:
+                f.write(f"{elapsed_time:.2f} seconds\n")
 
+            all_info = f"{2**index}_info_all.txt"
+            with open(all_info, 'a') as f:
+                f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {1} cores | threshold = {threshold_global} \n')
 
+        for numP in processes:
+            num_of_processes = numP
+            for method_name, method in paral_methods:
+                start_time = time.time()
+                if method_name == "StraightDivAndConqP":
+                    C = method((A_matrix, B_matrix))
+                else:
+                    C = method(A_matrix, B_matrix)
 
+                elapsed_time = time.time() - start_time
+
+                output_file = f"{input_filename}_{2**index}_output_{method_name}.txt"
+                writeMatrixToFile(output_file, C)
+
+                info_file = f"{input_filename}_{2**index}_info_{method_name}.txt"
+                with open(info_file, 'w') as f:
+                    f.write(f"{elapsed_time:.2f} seconds\n")
+
+                all_info = f"{2**index}_info_all.txt"
+                with open(all_info, 'a') as f:
+                    f.write(f' {time.strftime(" %Y-%m-%d %H: %M: %S", time.localtime(time.time()))} | {method_name}\t:    {elapsed_time: .2f} seconds | {num_of_processes} cores | threshold = {threshold_global} \n')
 
 
 if __name__ == '__main__':
